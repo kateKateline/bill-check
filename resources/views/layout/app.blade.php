@@ -46,5 +46,13 @@
             el.classList.toggle('hidden');
         }
     </script>
+    <script>
+    document.getElementById('billFileInput').addEventListener('change', function () {
+        if (this.files.length > 0) {
+            document.getElementById('billUploadForm').submit();
+        }
+    });
+</script>
+
 </body>
 </html>
