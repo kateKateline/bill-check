@@ -12,10 +12,6 @@
             <span class="text-xs font-medium uppercase tracking-widest text-slate-400 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
                 AI Diagnostics Active
             </span>
-            <a href="{{ route('history') }}"
-   class="text-sm font-medium text-slate-600 hover:text-indigo-600 transition">
-    History
-</a>
 
         </div>
     </div>
