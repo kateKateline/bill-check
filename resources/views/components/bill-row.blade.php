@@ -39,7 +39,7 @@
                 </div>
                 <div class="flex flex-col border-l border-slate-200 pl-4">
                     <span class="text-slate-400 uppercase font-bold tracking-tighter">Nominal</span>
-                    <span class="text-slate-700 font-bold text-indigo-600">Rp {{ $price }}</span>
+                    <span class="text-slate-700 font-bold ">Rp {{ $price }}</span>
                 </div>
             </div>
 
