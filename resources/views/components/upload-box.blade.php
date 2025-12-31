@@ -14,14 +14,14 @@
 
             <h3 class="text-lg font-bold text-slate-800 mb-1 transition-colors">Unggah Tagihan Rumah Sakit</h3>
             <p class="text-sm text-slate-500 mb-0">Klik untuk memilih file atau tarik ke sini</p>
-            <p class="text-[11px] text-slate-400 mt-4 uppercase tracking-[0.1em] font-medium">PNG, JPG, PDF (Max 10MB)</p>
+            <p class="text-[11px] text-slate-400 mt-4 uppercase tracking-[widest] font-medium">PNG, JPG, PDF (Max 10MB)</p>
         </div>
 
-        <div id="localPreview" class="hidden absolute inset-0 bg-white/90 backdrop-blur-sm rounded-2xl flex items-center justify-center p-4 animate-in fade-in duration-300">
+        <div id="localPreview" class="flex absolute inset-0 bg-white/90 backdrop-blur-sm rounded-2xl items-center justify-center p-4 animate-in fade-in duration-300">
             <div class="flex items-center gap-4 bg-white p-3 rounded-xl shadow-lg border border-slate-100">
                 <div class="w-12 h-12 rounded-lg bg-indigo-50 overflow-hidden border border-indigo-100">
                     <img id="previewImage" src="#" class="hidden w-full h-full object-cover">
-                    <div id="previewPdfIcon" class="hidden w-full h-full flex items-center justify-center text-rose-500">
+                    <div id="previewPdfIcon" class=" w-full h-full flex items-center justify-center text-rose-500">
                         <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M4 18V2h12v4h4v12H4zM14 4H6v12h8V4z"/></svg>
                     </div>
                 </div>
