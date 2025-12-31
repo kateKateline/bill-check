@@ -43,7 +43,6 @@ Pastikan sistem Anda sudah terinstal:
 ### 1. Clone Repository
 
 ```bash
-# Clone main application
 git clone https://github.com/yourusername/billcheck.git
 cd billcheck
 ```
@@ -52,27 +51,24 @@ cd billcheck
 
 #### Backend Dependencies
 ```bash
-# Install PHP dependencies via Composer
 composer install
 
-# Copy environment file
 cp .env.example .env
 
-# Generate application key
 php artisan key:generate
 ```
 
 #### Frontend Dependencies
 ```bash
-# Install Node.js dependencies
 npm install
+
 ```
 
 ### 3. Database Setup
 
 ```bash
-# Create database
 mysql -u root -p
+
 ```
 
 ```sql
@@ -91,7 +87,6 @@ DB_PASSWORD=your_password_here
 ```
 
 ```bash
-# Run migrations
 php artisan migrate
 ```
 
@@ -101,7 +96,6 @@ Aplikasi ini membutuhkan **PaddleOCR Service** yang berjalan terpisah untuk mela
 
 #### Clone OCR Repository
 ```bash
-# Di directory terpisah (di luar project Laravel)
 cd ..
 git clone https://github.com/KateKateline/paddle-ocr-service.git
 cd paddle-ocr-service
