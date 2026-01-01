@@ -58,6 +58,7 @@ class AnalyzeBillAction
                     'status' => $itemData['status'],
                     'label' => $itemData['label'],
                     'description' => $itemData['description'],
+                    'service_type' => $itemData['service_type'] ?? null,
                 ]);
 
                 $totalPrice += $priceInfo['converted_price'];

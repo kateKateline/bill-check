@@ -21,6 +21,7 @@ class BillItem extends Model
         'status',
         'label',
         'description',
+        'service_type',
     ];
 
     protected $casts = [

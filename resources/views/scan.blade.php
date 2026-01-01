@@ -28,36 +28,39 @@
     <div id="filePreviewWrapper" class="bg-white border-2 border-indigo-200 rounded-xl p-4 shadow-lg">
       <div class="relative group">
         @php
-          $fileUrl = asset('storage/' . $bill->file_path);
-          $isImage = in_array(strtolower(pathinfo($bill->file_path, PATHINFO_EXTENSION)), ['jpg', 'jpeg', 'png', 'gif']);
+          $fileExtension = strtolower(pathinfo($bill->file_path, PATHINFO_EXTENSION));
+          $fileName = basename($bill->file_path);
         @endphp
         
-        @if ($isImage)
-          <img 
-            src="{{ $fileUrl }}" 
-            alt="Uploaded bill" 
-            class="w-full h-auto rounded-lg object-contain max-h-48 mx-auto"
-            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-          >
-          <div class="hidden w-full h-32 bg-slate-100 rounded-lg items-center justify-center">
-            <div class="text-center">
-              <svg class="w-12 h-12 text-slate-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <p class="text-xs text-slate-500">Preview tidak tersedia</p>
-            </div>
+        <div class="w-full bg-slate-100 rounded-lg flex items-center justify-center py-6">
+          <div class="text-center">
+            @if (in_array($fileExtension, ['png']))
+              <!-- PNG Logo -->
+              <div class="w-16 h-16 bg-indigo-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <span class="text-2xl font-bold text-indigo-600">PNG</span>
+              </div>
+            @elseif (in_array($fileExtension, ['jpg', 'jpeg']))
+              <!-- JPG Logo -->
+              <div class="w-16 h-16 bg-rose-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <span class="text-2xl font-bold text-rose-600">JPG</span>
+              </div>
+            @elseif ($fileExtension === 'pdf')
+              <!-- PDF Logo -->
+              <div class="w-16 h-16 bg-red-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <span class="text-2xl font-bold text-red-600">PDF</span>
+              </div>
+            @else
+              <!-- Default File Logo -->
+              <div class="w-16 h-16 bg-slate-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <svg class="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+            @endif
+            <p class="text-sm font-semibold text-slate-700 mb-1 uppercase">{{ $fileExtension }}</p>
+            <p class="text-xs text-slate-500 truncate max-w-xs mx-auto">{{ $fileName }}</p>
           </div>
-        @else
-          <div class="w-full h-32 bg-slate-100 rounded-lg flex items-center justify-center">
-            <div class="text-center">
-              <svg class="w-12 h-12 text-slate-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <p class="text-xs font-semibold text-slate-700 mb-1">File PDF</p>
-              <p class="text-xs text-slate-500">{{ basename($bill->file_path) }}</p>
-            </div>
-          </div>
-        @endif
+        </div>
         
       </div>
       
@@ -67,7 +70,7 @@
           <svg class="w-5 h-5 text-amber-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
-          <div>
+          <div class="flex-1">
             <h4 class="font-semibold text-amber-900 mb-1 text-sm">
               @if (isset($hasNoText) && $hasNoText)
                 Tidak Ada Teks Terdeteksi pada File
@@ -75,7 +78,7 @@
                 File yang Diupload Bukan Tagihan Rumah Sakit
               @endif
             </h4>
-            <p class="text-xs text-amber-700 leading-relaxed">
+            <p class="text-xs text-amber-700 leading-relaxed mb-3">
               @if (isset($hasNoText) && $hasNoText)
                 File yang Anda upload tidak mengandung teks yang dapat dibaca. Pastikan file yang diupload adalah dokumen tagihan rumah sakit yang jelas dan dapat dibaca.
               @else
@@ -83,6 +86,12 @@
                 Pastikan Anda mengupload dokumen tagihan medis yang valid untuk mendapatkan hasil analisis yang akurat.
               @endif
             </p>
+            <a href="/" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-amber-800 bg-amber-100 hover:bg-amber-200 rounded-lg transition-colors duration-200">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              </svg>
+              Upload Ulang
+            </a>
           </div>
         </div>
       </div>

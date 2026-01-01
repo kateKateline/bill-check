@@ -105,6 +105,15 @@ class ResponseParser
             $status = 'review';
         }
 
+        // Normalize service type (rawat_inap, rawat_jalan, or null)
+        $serviceType = null;
+        if (isset($item['service_type'])) {
+            $serviceType = strtolower(trim($item['service_type']));
+            if (!in_array($serviceType, ['rawat_inap', 'rawat_jalan'])) {
+                $serviceType = null;
+            }
+        }
+
         return [
             'item_name' => trim($item['item_name']),
             'category' => trim($item['category'] ?? 'Lainnya'),
@@ -112,6 +121,7 @@ class ResponseParser
             'status' => $status,
             'label' => trim($item['label'] ?? 'Perlu Ditinjau'),
             'description' => trim($item['description'] ?? ''),
+            'service_type' => $serviceType,
         ];
     }
 
@@ -138,6 +148,31 @@ class ResponseParser
     }
 
     /**
+     * Normalize item name for duplicate detection
+     * 
+     * Removes extra spaces, punctuation, and normalizes the name
+     * 
+     * @param string $name
+     * @return string
+     */
+    private function normalizeItemName(string $name): string
+    {
+        // Convert to lowercase
+        $normalized = strtolower(trim($name));
+        
+        // Remove common punctuation and special characters
+        $normalized = preg_replace('/[\/\-\.,;:()\[\]{}]/', ' ', $normalized);
+        
+        // Remove multiple spaces
+        $normalized = preg_replace('/\s+/', ' ', $normalized);
+        
+        // Trim again
+        $normalized = trim($normalized);
+        
+        return $normalized;
+    }
+
+    /**
      * Process duplicates and detect phantom billing
      * 
      * Items with same name and same price are flagged as phantom billing.
@@ -149,53 +184,71 @@ class ResponseParser
     private function processDuplicates(array $items): array
     {
         $processed = [];
-        $seenByName = []; // Track items by name only (for different prices)
-        $seenByExact = []; // Track items by name+price (for exact duplicates)
+        $seenByName = []; // Track items by normalized name only (for different prices)
+        $seenByExact = []; // Track items by normalized name+price (for exact duplicates)
+        $duplicateGroups = []; // Track all items with same name+price for marking
 
+        // First pass: collect all items and group duplicates
         foreach ($items as $item) {
-            $itemName = strtolower(trim($item['item_name']));
+            $normalizedName = $this->normalizeItemName($item['item_name']);
             $itemPrice = (float) $item['price'];
             
-            // Create a key for exact duplicate detection (name + price)
-            $exactKey = $itemName . '|' . $itemPrice;
+            // Create a key for exact duplicate detection (normalized name + price)
+            $exactKey = $normalizedName . '|' . $itemPrice;
             
-            // Check for exact duplicate (same name AND same price) - PHANTOM BILLING
-            if (isset($seenByExact[$exactKey])) {
-                // Mark this item as phantom billing
-                $item['status'] = 'danger';
-                $item['label'] = 'Potensi Phantom Billing';
-                $item['description'] = 'Item duplikat dengan nama dan harga yang sama persis. ' . 
-                    ($item['description'] ?? '');
-                
-                // Also mark the previously seen one
-                foreach ($processed as $idx => $procItem) {
-                    if (strtolower(trim($procItem['item_name'])) === $itemName && 
-                        abs((float)$procItem['price'] - $itemPrice) < 0.01) {
-                        $processed[$idx]['status'] = 'danger';
-                        $processed[$idx]['label'] = 'Potensi Phantom Billing';
-                        $processed[$idx]['description'] = 'Item duplikat dengan nama dan harga yang sama persis. ' . 
-                            ($processed[$idx]['description'] ?? '');
-                        break;
-                    }
+            // Track duplicate groups
+            if (!isset($duplicateGroups[$exactKey])) {
+                $duplicateGroups[$exactKey] = [];
+            }
+            $duplicateGroups[$exactKey][] = count($processed); // Store index
+            
+            // Store normalized name for reference
+            $item['_normalized_name'] = $normalizedName;
+            $processed[] = $item;
+        }
+
+        // Second pass: mark duplicates as danger
+        foreach ($duplicateGroups as $exactKey => $indices) {
+            // If there are 2 or more items with same name and price, mark all as danger
+            if (count($indices) >= 2) {
+                foreach ($indices as $idx) {
+                    $processed[$idx]['status'] = 'danger';
+                    $processed[$idx]['label'] = 'Potensi Phantom Billing';
+                    $processed[$idx]['description'] = 'Item duplikat dengan nama dan harga yang sama persis ditemukan ' . 
+                        count($indices) . ' kali dalam tagihan. ' . 
+                        ($processed[$idx]['description'] ?? '');
                 }
-                
-                $processed[] = $item;
-                $seenByExact[$exactKey] = true;
+            }
+        }
+
+        // Third pass: handle same name but different price (keep first occurrence)
+        $finalProcessed = [];
+        $seenByName = [];
+        
+        foreach ($processed as $item) {
+            $normalizedName = $item['_normalized_name'];
+            $itemPrice = (float) $item['price'];
+            $exactKey = $normalizedName . '|' . $itemPrice;
+            
+            // If exact duplicate (same name + same price), always include all (already marked as danger)
+            if (isset($duplicateGroups[$exactKey]) && count($duplicateGroups[$exactKey]) >= 2) {
+                unset($item['_normalized_name']); // Remove temporary field
+                $finalProcessed[] = $item;
                 continue;
             }
             
-            // Check for same name but different price - take only the first one
-            if (isset($seenByName[$itemName])) {
+            // If same normalized name but different price, only keep first occurrence
+            if (isset($seenByName[$normalizedName])) {
                 // Skip this duplicate (keep the first one with different price)
                 continue;
             }
             
-            // Mark as seen
-            $seenByName[$itemName] = true;
-            $seenByExact[$exactKey] = true;
-            $processed[] = $item;
+            // Mark as seen and add to final list
+            $seenByName[$normalizedName] = true;
+            unset($item['_normalized_name']); // Remove temporary field
+            $finalProcessed[] = $item;
         }
 
-        return $processed;
+        return $finalProcessed;
     }
 }
