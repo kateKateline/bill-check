@@ -45,6 +45,7 @@ Pastikan sistem Anda sudah terinstal:
 
 ### 1. Clone Repository
 
+-CMD/git
 ```bash
 git clone https://github.com/yourusername/billcheck.git
 cd billcheck
@@ -53,6 +54,7 @@ cd billcheck
 ### 2. Install Dependencies
 
 #### Backend Dependencies
+-powershell
 ```bash
 composer install
 
@@ -62,6 +64,7 @@ php artisan key:generate
 ```
 
 #### Frontend Dependencies
+-CMD
 ```bash
 npm install
 
